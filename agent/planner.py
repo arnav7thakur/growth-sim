@@ -2,7 +2,7 @@
 
 from agent.core import run_full_simulation, get_strategy_recommendation
 from data.markets import markets
-
+from agent.llm import get_goal_analysis
 def plan_strategy(user_goal: str, market: str = None):
     """
     Takes a user goal and recommends a strategy plan.
@@ -29,7 +29,7 @@ def plan_strategy(user_goal: str, market: str = None):
     best_score = float("-inf")
 
     for strategy in strategies_to_test:
-        result = get_strategy_recommendation(market, [strategy])
+        result = get_strategy_recommendation(market)
         if result["Score"] > best_score:
             best = result
             best_score = result["Score"]

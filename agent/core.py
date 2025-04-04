@@ -59,9 +59,15 @@ def run_full_simulation():
             results.append(simulate_strategy(market, strategy))
     return results
 
+def get_strategy_recommendation(market_name, strategies=None):
+    """
+    Recommends the best growth strategy for a given market.
+    If a list of strategies is provided, it evaluates only those.
+    Otherwise, it evaluates all available strategies.
+    """
+    # Default to all strategies if none are specified
+    strategies = strategies or list(strategy_effects.keys())
 
-def get_strategy_recommendation(market_name):
-    strategies = list(strategy_effects.keys())
     baseline = baseline_performance(market_name)
     baseline_score = baseline["Score"]
 
@@ -71,11 +77,14 @@ def get_strategy_recommendation(market_name):
         sim["Delta_Score"] = sim["Score"] - baseline_score
         scored.append(sim)
 
+    # Sort strategies by performance improvement
     scored.sort(key=lambda x: x["Delta_Score"], reverse=True)
-    best = scored[0]
+    
+    best = scored[0] if scored else None
+
     return {
-        "recommended": best["Strategy"],
-        "delta_score": round(best["Delta_Score"], 2),
+        "recommended": best["Strategy"] if best else None,
+        "delta_score": round(best["Delta_Score"], 2) if best else None,
         "details": scored,
         "baseline_score": baseline_score
     }

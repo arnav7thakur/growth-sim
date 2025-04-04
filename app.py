@@ -26,6 +26,8 @@ strategies = list(strategy_effects.keys())
 # Streamlit UI
 # -----------------------
 st.set_page_config(page_title="Global Growth Simulation Agent", layout="wide")
+#st.set_page_config(page_title="GrowthSim", layout="wide")
+
 st.title("🌍 Global Growth Simulation Agent")
 
 st.markdown("""
@@ -158,7 +160,6 @@ with tab3:
         st.markdown("**Note:** A higher score indicates a more efficient strategy for long-term growth (LTV/CAC × Retention).")
 
 
-st.set_page_config(page_title="GrowthSim", layout="wide")
 
 st.title("🚀 Growth Strategy Simulator")
 st.write("Give me your growth goal, and I’ll simulate and recommend the best strategy!")
