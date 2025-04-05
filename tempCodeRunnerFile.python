@@ -1,0 +1,2 @@
+get_goal_analysis("increase retention and reduce CAC")
+# Output: ['referral_program', 'localization', 'freemium_model']
