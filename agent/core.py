@@ -22,7 +22,7 @@ def baseline_performance(market_name):
 
 def simulate_strategy(market_name, strategy):
     base = markets[market_name]
-
+    
     if strategy == "baseline":
         return baseline_performance(market_name)
 

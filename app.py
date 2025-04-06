@@ -17,7 +17,7 @@ from core.baseline import baseline_market_performance
 from data.strategy_effects import strategy_effects
 from data.markets import markets
 from agent.core import simulate_strategy, baseline_performance, run_full_simulation, get_strategy_recommendation
-from agent.planner import plan_strategy
+from core.planner import plan_strategy
 
 
 strategies = list(strategy_effects.keys())
