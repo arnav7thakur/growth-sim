@@ -18,6 +18,7 @@ from data.strategy_effects import strategy_effects
 from data.markets import markets
 from agent.core import simulate_strategy, baseline_performance, run_full_simulation, get_strategy_recommendation
 from core.planner import plan_strategy
+from utils.file_parser import parse_uploaded_file
 
 
 strategies = list(strategy_effects.keys())
@@ -170,11 +171,23 @@ user_goal = st.text_input("🎯 What's your growth goal?", placeholder="e.g., im
 # --- Market selection (optional) ---
 selected_market = st.selectbox("🌍 Select a market", [""] + list(markets.keys()))
 
+# --- Optional company data upload ---
+uploaded_file = st.file_uploader("📁 Upload your company data (CSV, Excel, or JSON)", type=["csv", "xlsx", "json"])
+
 # --- Run planner when user submits a goal ---
 if st.button("Simulate & Recommend") and user_goal:
     with st.spinner("Thinking like a strategist..."):
-        recommendation = plan_strategy(user_goal, selected_market or None)
-    
+        parsed_df = None
+        if uploaded_file:
+            try:
+                parsed_df = parse_uploaded_file(uploaded_file)
+                st.success("✅ Data uploaded and parsed successfully.")
+            except Exception as e:
+                st.error(f"❌ Failed to parse file: {str(e)}")
+
+        # Feed parsed_df to planner (planner must handle None safely)
+        recommendation = plan_strategy(user_goal, selected_market or None, company_data=parsed_df)
+
     if recommendation:
         st.success("📈 Recommended Strategy:")
         st.write(f"**Strategy**: {recommendation['Strategy']}")
