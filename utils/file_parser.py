@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 
-def load_and_parse(uploaded_file):
+def parse_upload_file(uploaded_file):
     """
     Accepts uploaded .csv, .xlsx, or .json file.
     Returns a pandas DataFrame or raises ValueError.
@@ -42,6 +42,9 @@ def extract_metrics(df):
         "arpu": "ARPU",
         "mrr": "MRR",
         "arr": "ARR",
+        "conversion_rate": "Conversion Rate",
+        "revenue_per_customer": "Revenue per Customer",
+        "avg_revenue_per_customer": "Revenue per Customer",
     }
 
     metrics = {}

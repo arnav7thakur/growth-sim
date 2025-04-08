@@ -18,7 +18,7 @@ from data.strategy_effects import strategy_effects
 from data.markets import markets
 from agent.core import simulate_strategy, baseline_performance, run_full_simulation, get_strategy_recommendation
 from core.planner import plan_strategy
-from utils.file_parser import parse_uploaded_file
+from utils.file_parser import parse_upload_file
 
 
 strategies = list(strategy_effects.keys())
