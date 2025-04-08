@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 
-def parse_upload_file(uploaded_file):
+def parse_uploaded_file(uploaded_file):
     """
     Accepts uploaded .csv, .xlsx, or .json file.
     Returns a pandas DataFrame or raises ValueError.

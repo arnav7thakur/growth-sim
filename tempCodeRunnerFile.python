@@ -1,3 +1,43 @@
-from core.planner import plan_strategy
+import pandas as pd
+import numpy as np
+import json
 
-print(plan_strategy("increase retention", "India"))
+# Define KPIs with display names and value ranges
+kpi_info = {
+    "customer_acquisition_cost": {"display": "CAC", "range": (50, 500)},
+    "ltv": {"display": "LTV", "range": (300, 5000)},
+    "churn_rate": {"display": "Churn Rate", "range": (0.01, 0.30)},
+    "retention_rate": {"display": "Retention Rate", "range": (0.70, 0.99)},
+    "arpu": {"display": "ARPU", "range": (10, 200)},
+    "mrr": {"display": "MRR", "range": (1000, 100000)},
+    "arr": {"display": "ARR", "range": (12000, 1200000)},
+    "conversion_rate": {"display": "Conversion Rate", "range": (0.005, 0.20)},
+    "revenue_per_customer": {"display": "Revenue per Customer", "range": (100, 2000)},
+}
+
+def generate_kpi_dataset(n_rows=10000, seed=42):
+    np.random.seed(seed)
+    data = {}
+
+    for kpi, meta in kpi_info.items():
+        low, high = meta["range"]
+        if "rate" in kpi or "conversion" in kpi:
+            values = np.round(np.random.uniform(low, high, n_rows), 4)
+        else:
+            values = np.round(np.random.normal((low + high) / 2, (high - low) / 6, n_rows), 2)
+            values = np.clip(values, low, high)
+        data[kpi] = values
+
+    df = pd.DataFrame(data)
+    return df
+
+if __name__ == "__main__":
+    df = generate_kpi_dataset()
+
+    # Export to CSV
+    df.to_csv("synthetic_kpi_data.csv", index=False)
+
+    # Export to JSON
+    df.to_json("synthetic_kpi_data.json", orient="records", lines=True)
+
+    print("Synthetic dataset exported to 'synthetic_kpi_data.csv' and 'synthetic_kpi_data.json'")

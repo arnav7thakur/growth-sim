@@ -1,14 +1,19 @@
 from agent.core import simulate_strategy, baseline_performance, get_strategy_recommendation
 from agent.llm import get_goal_analysis
 
-def plan_strategy(user_goal: str, market: str = None):
+def plan_strategy(user_goal: str, market: str = None, company_data=None):
     """
     Takes a user goal and recommends a strategy plan.
     Uses LLM goal analysis to suggest strategies.
-    No longer falls back to hardcoded keyword-based rules.
+    Accepts optional company_data (DataFrame) for future use.
     """
 
     market = market or "India"  # 🌍 Default market if none provided
+
+    # 🚨 DEBUG: Confirm if company_data was passed
+    if company_data is not None:
+        print("📊 Received company_data:")
+        print(company_data.head())
 
     # 1. Try LLM-based goal analysis
     strategies_to_test = get_goal_analysis(user_goal)
@@ -22,17 +27,6 @@ def plan_strategy(user_goal: str, market: str = None):
             "Used_LLM": True,
             "Recommended_Strategy": None
         }
-
-    # ⛔️ Hardcoded fallback logic (deprecated, now unused)
-    """
-    if not strategies_to_test:
-        if "retention" in user_goal.lower():
-            strategies_to_test = ["freemium_model", "localization", "referral_program"]
-        elif "cac" in user_goal.lower() or "customer acquisition" in user_goal.lower():
-            strategies_to_test = ["referral_program", "freemium_model"]
-        elif "growth" in user_goal.lower() or "overall" in user_goal.lower():
-            strategies_to_test = ["influencer_marketing", "localization", "paid_ads"]
-    """
 
     print(f"🧠 Strategies considered for goal '{user_goal}': {strategies_to_test}")
 
