@@ -1,0 +1,4 @@
+name = "arnav-streamlit-proxy"
+main = "worker.js"
+compatibility_date = "2025-04-09"
+type = "javascript"
