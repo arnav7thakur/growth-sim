@@ -1,4 +1,4 @@
-name = "arnav-streamlit-proxy"
+name = "growth-sim"
 main = "worker.js"
 compatibility_date = "2025-04-09"
 type = "javascript"
