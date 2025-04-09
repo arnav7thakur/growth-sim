@@ -1,50 +1,56 @@
-# Streamlit App Placeholder
+# Streamlit App
 # Global Growth Simulation Agent for Stimuler
 # Run with: streamlit run app.py
 
 import streamlit as st
-import random
 import pandas as pd
 import plotly.express as px
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# -----------------------
-# Imports from Core Modules
-# -----------------------
+# Core imports
 from core.simulator import simulate_strategy
-from core.baseline import baseline_market_performance
 from data.strategy_effects import strategy_effects
 from data.markets import markets
-from agent.core import simulate_strategy, baseline_performance, run_full_simulation, get_strategy_recommendation
 from core.planner import plan_strategy
 from utils.file_parser import parse_uploaded_file
 
-
+# Strategies list
 strategies = list(strategy_effects.keys())
 
-# -----------------------
-# Streamlit UI
-# -----------------------
+# App setup
 st.set_page_config(page_title="Global Growth Simulation Agent", layout="wide")
-#st.set_page_config(page_title="GrowthSim", layout="wide")
-
 st.title("🌍 Global Growth Simulation Agent")
 
 st.markdown("""
-This tool simulates digital growth strategies across Stimuler's key markets: **India**, **Indonesia**, and **Latin America**. It helps test which strategies may yield the best efficiency in terms of CAC, LTV, and retention.
+Simulate digital growth strategies across key markets: **India**, **Indonesia**, and **Latin America**.
 """)
 
+# --- Company Data Upload ---
+company_data = None
+uploaded_file = st.file_uploader("📁 Upload your company data (CSV, Excel, or JSON)", type=["csv", "xlsx", "json"])
+if uploaded_file:
+    try:
+        company_data = parse_uploaded_file(uploaded_file)
+        st.success("✅ Company data uploaded and parsed successfully.")
+    except Exception as e:
+        st.error(f"❌ Failed to parse file: {str(e)}")
+
+# --- Helper to simulate with optional company_data ---
+def simulate_with_data(market, strategy, data=None):
+    return simulate_strategy(market, strategy, company_data=data)
+
+# --- TAB 1: Single Strategy Simulation ---
 tab1, tab2 = st.tabs(["🔍 Single Strategy", "📊 Full Simulation"])
 
 with tab1:
     selected_strategy = st.selectbox("Choose a Growth Strategy to Simulate", strategies)
 
     if st.button("Simulate Across Markets"):
-        results = [simulate_strategy(market, selected_strategy) for market in markets.keys()]
+        results = [simulate_with_data(market, selected_strategy, company_data) for market in markets.keys()]
         df = pd.DataFrame(results)
 
-        baseline_results = [simulate_strategy(market, strategy="baseline") for market in markets.keys()]
+        baseline_results = [simulate_with_data(market, "baseline", company_data) for market in markets.keys()]
         baseline_df = pd.DataFrame(baseline_results)
 
         comparison_df = df.merge(baseline_df, on="Market", suffixes=("", "_baseline"))
@@ -61,8 +67,7 @@ with tab1:
             x="Market",
             y="Delta_Score",
             color="Market",
-            title="🚀 Improvement Over Baseline (Score Delta)",
-            labels={"Delta_Score": "Improvement in Score"},
+            title="🚀 Improvement Over Baseline (Score Delta)"
         )
         st.plotly_chart(fig_delta, use_container_width=True)
 
@@ -72,18 +77,16 @@ with tab1:
         fig = px.bar(df, x="Market", y="Score", color="Strategy", title="Strategy Effectiveness by Market")
         st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown("""
-        **Score Formula** = (LTV / CAC) × Retention  
-        Higher scores indicate better long-term growth efficiency in that market.
-        """)
+        st.markdown("**Score Formula** = (LTV / CAC) × Retention")
 
+# --- TAB 2: Full Simulation ---
 with tab2:
     if st.button("Run Full Simulation"):
         full_results = []
         for market in markets.keys():
-            full_results.append(baseline_market_performance(market))
+            full_results.append(simulate_with_data(market, "baseline", company_data))
             for strategy in strategies:
-                full_results.append(simulate_strategy(market, strategy))
+                full_results.append(simulate_with_data(market, strategy, company_data))
 
         full_df = pd.DataFrame(full_results)
 
@@ -116,20 +119,10 @@ with tab2:
         st.subheader("🌍 Global Strategy Performance (Average Score Across All Markets)")
         st.dataframe(global_avg_df, use_container_width=True)
 
-        fig3 = px.bar(
-            global_avg_df,
-            x="Strategy",
-            y="Score",
-            title="Top Performing Strategies (Global Average)",
-            color="Strategy"
-        )
+        fig3 = px.bar(global_avg_df, x="Strategy", y="Score", title="Top Performing Strategies (Global Average)", color="Strategy")
         st.plotly_chart(fig3, use_container_width=True)
 
-        st.markdown("""
-        ✅ **Top strategies** are determined by average score across all markets.  
-        🧠 Use this to identify consistent winners vs. market-specific outliers.
-        """)
-
+# --- TAB 3: Advisor ---
 tab3 = st.tabs(["📋 Strategy Advisor"])[0]
 
 with tab3:
@@ -138,8 +131,8 @@ with tab3:
     selected_market = st.selectbox("Choose a Market to Analyze", list(markets.keys()))
 
     if st.button("Run Advisor for Market"):
-        baseline = baseline_market_performance(selected_market)
-        strategy_results = [simulate_strategy(selected_market, s) for s in strategies]
+        baseline = simulate_with_data(selected_market, "baseline", company_data)
+        strategy_results = [simulate_with_data(selected_market, s, company_data) for s in strategies]
 
         df = pd.DataFrame(strategy_results)
         baseline_score = baseline["Score"]
@@ -152,41 +145,21 @@ with tab3:
         st.metric(label="Best Score Improvement", value=round(best_row['Delta_Score'], 2))
 
         fig = px.bar(df, x="Strategy", y="Delta_Score", color="Strategy",
-                     title=f"📈 Strategy Impact vs. Baseline in {selected_market}",
-                     labels={"Delta_Score": "Score Improvement"})
+                     title=f"📈 Strategy Impact vs. Baseline in {selected_market}")
         st.plotly_chart(fig, use_container_width=True)
 
         st.dataframe(df[["Strategy", "Score", "Delta_Score", "CAC", "LTV", "Retention"]], use_container_width=True)
 
-        st.markdown("**Note:** A higher score indicates a more efficient strategy for long-term growth (LTV/CAC × Retention).")
-
-
-
+# --- Growth Goal Simulation ---
 st.title("🚀 Growth Strategy Simulator")
 st.write("Give me your growth goal, and I’ll simulate and recommend the best strategy!")
 
-# --- User goal input ---
 user_goal = st.text_input("🎯 What's your growth goal?", placeholder="e.g., improve retention, lower CAC, maximize growth")
+selected_market = st.selectbox("🌍 Select a market", [""] + list(markets.keys()), key="goal_market")
 
-# --- Market selection (optional) ---
-selected_market = st.selectbox("🌍 Select a market", [""] + list(markets.keys()))
-
-# --- Optional company data upload ---
-uploaded_file = st.file_uploader("📁 Upload your company data (CSV, Excel, or JSON)", type=["csv", "xlsx", "json"])
-
-# --- Run planner when user submits a goal ---
 if st.button("Simulate & Recommend") and user_goal:
     with st.spinner("Thinking like a strategist..."):
-        parsed_df = None
-        if uploaded_file:
-            try:
-                parsed_df = parse_uploaded_file(uploaded_file)
-                st.success("✅ Data uploaded and parsed successfully.")
-            except Exception as e:
-                st.error(f"❌ Failed to parse file: {str(e)}")
-
-        # Feed parsed_df to planner (planner must handle None safely)
-        recommendation = plan_strategy(user_goal, selected_market or None, company_data=parsed_df)
+        recommendation = plan_strategy(user_goal, selected_market or None, company_data=company_data)
 
     if recommendation:
         st.success("📈 Recommended Strategy:")

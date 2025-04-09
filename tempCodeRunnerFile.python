@@ -31,13 +31,13 @@ def generate_kpi_dataset(n_rows=10000, seed=42):
     df = pd.DataFrame(data)
     return df
 
+def export_nested_json(df, output_path="synthetic_kpi_data_nested.json"):
+    nested_data = {f"row{i+1}": row for i, row in df.iterrows()}
+    with open(output_path, "w") as f:
+        json.dump(nested_data, f, indent=2)
+
 if __name__ == "__main__":
     df = generate_kpi_dataset()
-
-    # Export to CSV
     df.to_csv("synthetic_kpi_data.csv", index=False)
-
-    # Export to JSON
-    df.to_json("synthetic_kpi_data.json", orient="records", lines=True)
-
-    print("Synthetic dataset exported to 'synthetic_kpi_data.csv' and 'synthetic_kpi_data.json'")
+    export_nested_json(df)
+    print("Exported to 'synthetic_kpi_data.csv' and 'synthetic_kpi_data_nested.json'")

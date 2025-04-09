@@ -3,10 +3,15 @@ from data.markets import markets
 from data.strategy_effects import strategy_effects
 
 
-def baseline_performance(market_name):
-    base = markets[market_name]
+def get_market_data(market_name, company_data=None):
+    if company_data is not None and market_name in company_data:
+        return company_data[market_name]
+    return markets.get(market_name, {})
 
-    # Handle missing values with fallback/defaults
+
+def baseline_performance(market_name, company_data=None):
+    base = get_market_data(market_name, company_data)
+
     CAC = base.get("base_CAC", 1.0)
     LTV = base.get("base_LTV", 1.0)
     retention = base.get("retention", 1.0)
@@ -27,10 +32,9 @@ def baseline_performance(market_name):
     }
 
 
-def simulate_strategy(market_name, strategy):
-    base = markets[market_name]
+def simulate_strategy(market_name, strategy, company_data=None):
+    base = get_market_data(market_name, company_data)
 
-    # Default multipliers if strategy not found
     strat = strategy_effects.get(strategy, {
         "CAC_multiplier": 1.0,
         "LTV_multiplier": 1.0,
@@ -39,7 +43,6 @@ def simulate_strategy(market_name, strategy):
         "revenue_per_customer_multiplier": 1.0
     })
 
-    # Use base values with fallbacks
     base_CAC = base.get("base_CAC", 1.0)
     base_LTV = base.get("base_LTV", 1.0)
     retention = base.get("retention", 1.0)
@@ -68,30 +71,25 @@ def simulate_strategy(market_name, strategy):
     }
 
 
-def run_full_simulation():
+def run_full_simulation(company_data=None):
     strategies = list(strategy_effects.keys())
     results = []
 
     for market in markets:
-        results.append(baseline_performance(market))
+        results.append(baseline_performance(market, company_data))
         for strategy in strategies:
-            results.append(simulate_strategy(market, strategy))
+            results.append(simulate_strategy(market, strategy, company_data))
     return results
 
 
-def get_strategy_recommendation(market_name, strategies=None):
-    """
-    Recommends the best growth strategy for a given market.
-    If a list of strategies is provided, it evaluates only those.
-    Otherwise, it evaluates all available strategies.
-    """
+def get_strategy_recommendation(market_name, strategies=None, company_data=None):
     strategies = strategies or list(strategy_effects.keys())
-    baseline = baseline_performance(market_name)
+    baseline = baseline_performance(market_name, company_data)
     baseline_score = baseline["Score"]
 
     scored = []
     for s in strategies:
-        sim = simulate_strategy(market_name, s)
+        sim = simulate_strategy(market_name, s, company_data)
         sim["Delta_Score"] = sim["Score"] - baseline_score
         scored.append(sim)
 
