@@ -1,30 +1,24 @@
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request) {
     const url = new URL(request.url);
-    const path = url.pathname;
 
-    if (path.startsWith("/marketing-growth-sim")) {
-      const targetUrl = "https://growth-sim.streamlit.app" + path.replace("/marketing-growth-sim", "");
+    if (url.pathname.startsWith("/marketing-growth-sim")) {
+      const target = "https://growth-sim.streamlit.app" + url.pathname.replace("/marketing-growth-sim", "");
 
-      const reqInit = {
+      const init = {
         method: request.method,
         headers: request.headers,
-        redirect: "follow",
+        body: ["GET", "HEAD"].includes(request.method) ? undefined : await request.clone().arrayBuffer(),
       };
 
-      if (request.method !== "GET" && request.method !== "HEAD") {
-        reqInit.body = await request.clone().arrayBuffer();  // Clone + read body safely
-      }
-
-      const response = await fetch(targetUrl, reqInit);
-
-      const newHeaders = new Headers(response.headers);
-      newHeaders.set("Access-Control-Allow-Origin", "*");
+      const response = await fetch(target, init);
+      const headers = new Headers(response.headers);
+      headers.set("Access-Control-Allow-Origin", "*");
 
       return new Response(response.body, {
         status: response.status,
         statusText: response.statusText,
-        headers: newHeaders,
+        headers,
       });
     }
 
