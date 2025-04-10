@@ -1,0 +1,5 @@
+[server]
+port = 10000
+enableCORS = false
+headless = true
+baseUrlPath = "gtm-simulator"
