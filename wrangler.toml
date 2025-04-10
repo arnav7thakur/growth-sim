@@ -1,4 +1,4 @@
 name = "growth-sim"
-main = "./worker.js"  # <-- Add the ./ to make sure it's seen correctly
+main = "worker.js"  # <-- Add the ./ to make sure it's seen correctly
 compatibility_date = "2025-04-10"
 type = "javascript"
