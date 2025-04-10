@@ -6,17 +6,19 @@ export default {
     if (path.startsWith("/marketing-growth-sim")) {
       const targetUrl = "https://growth-sim.streamlit.app" + path.replace("/marketing-growth-sim", "");
 
-      const modifiedRequest = new Request(targetUrl, {
+      const init = {
         method: request.method,
         headers: request.headers,
-        body: request.body,
         redirect: "follow",
-      });
+      };
 
-      // Use fetch to proxy content without redirecting user
-      const response = await fetch(modifiedRequest);
+      // Only include body if it's a method that supports it
+      if (request.method !== "GET" && request.method !== "HEAD") {
+        init.body = request.body;
+      }
 
-      // Clone and modify CORS headers if needed
+      const response = await fetch(targetUrl, init);
+
       const newHeaders = new Headers(response.headers);
       newHeaders.set("Access-Control-Allow-Origin", "*");
 
