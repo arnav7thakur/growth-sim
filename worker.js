@@ -6,18 +6,17 @@ export default {
     if (path.startsWith("/marketing-growth-sim")) {
       const targetUrl = "https://growth-sim.streamlit.app" + path.replace("/marketing-growth-sim", "");
 
-      const init = {
+      const reqInit = {
         method: request.method,
         headers: request.headers,
         redirect: "follow",
       };
 
-      // Only include body if it's a method that supports it
       if (request.method !== "GET" && request.method !== "HEAD") {
-        init.body = request.body;
+        reqInit.body = await request.clone().arrayBuffer();  // Clone + read body safely
       }
 
-      const response = await fetch(targetUrl, init);
+      const response = await fetch(targetUrl, reqInit);
 
       const newHeaders = new Headers(response.headers);
       newHeaders.set("Access-Control-Allow-Origin", "*");
