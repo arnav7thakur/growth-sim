@@ -2,8 +2,8 @@ export default {
   async fetch(request) {
     const url = new URL(request.url);
 
-    if (url.pathname.startsWith("/marketing-growth-sim")) {
-      const target = "https://growth-sim.streamlit.app" + url.pathname.replace("/marketing-growth-sim", "");
+    if (url.pathname.startsWith("/gtm-simulator")) {
+      const target = "https://growth-sim.streamlit.app" + url.pathname.replace("/gtm-simulator", "");
 
       const init = {
         method: request.method,
